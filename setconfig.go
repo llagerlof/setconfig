@@ -81,15 +81,6 @@ func main() {
 
 			// Change variable value.
 			if strings.TrimSpace(matches[2]) == strings.TrimSpace(variableName) && strings.TrimSpace(matches[6]) != strings.TrimSpace(variableValue) {
-				/*
-				   fmt.Printf("matches[0]: '%v'  type: %v\n", matches[0], reflect.TypeOf(matches[0]))
-				   fmt.Printf("matches[1]: '%v'  type: %v\n", matches[1], reflect.TypeOf(matches[1]))
-				   fmt.Printf("matches[2]: '%v'  type: %v\n", matches[2], reflect.TypeOf(matches[2]))
-				   fmt.Printf("matches[3]: '%v'  type: %v\n", matches[3], reflect.TypeOf(matches[3]))
-				   fmt.Printf("matches[4]: '%v'  type: %v\n", matches[4], reflect.TypeOf(matches[4]))
-				   fmt.Printf("matches[5]: '%v'  type: %v\n", matches[5], reflect.TypeOf(matches[5]))
-				*/
-
 				linebufferwrite := matches[1] + variableName + matches[3] + "=" + matches[5] + variableValue
 				lines[i] = linebufferwrite
 				variableChanged++
