@@ -37,8 +37,8 @@ func main() {
 
 	// Store arguments in variables.
 	var filename = os.Args[1]
-	var variable_name = os.Args[2]
-	var variable_value = os.Args[3]
+	var variableName = os.Args[2]
+	var variableValue = os.Args[3]
 
 	// Load file into lines array.
 	input, err := ioutil.ReadFile(filename)
@@ -51,12 +51,12 @@ func main() {
 	var regexstring = "^(\\s*)([a-zA-Z0-9_-]+)(\\s*)(=)(\\s*)(.*)"
 
 	// Identify if some variable value was changed.
-	var variable_changed = 0
+	var variableChanged = 0
 
 	// Variable to set the identified separator ('=' or ' = ').
-	var identified_separator = ""
+	var identifiedSeparator = ""
 
-	var found_variable_with_same_value = false
+	var foundVariableWithSameValue = false
 
 	// Loop in array, changing variables as needed.
 	for i, line := range lines {
@@ -75,12 +75,12 @@ func main() {
 		// A valid 'variable = value' line
 		if len(matches) >= 5 {
 			// Identify default separator.
-			if identified_separator == "" {
-				identified_separator = matches[3] + "=" + matches[5]
+			if identifiedSeparator == "" {
+				identifiedSeparator = matches[3] + "=" + matches[5]
 			}
 
 			// Change variable value.
-			if strings.TrimSpace(matches[2]) == strings.TrimSpace(variable_name) && strings.TrimSpace(matches[6]) != strings.TrimSpace(variable_value) {
+			if strings.TrimSpace(matches[2]) == strings.TrimSpace(variableName) && strings.TrimSpace(matches[6]) != strings.TrimSpace(variableValue) {
 				/*
 				   fmt.Printf("matches[0]: '%v'  type: %v\n", matches[0], reflect.TypeOf(matches[0]))
 				   fmt.Printf("matches[1]: '%v'  type: %v\n", matches[1], reflect.TypeOf(matches[1]))
@@ -90,27 +90,27 @@ func main() {
 				   fmt.Printf("matches[5]: '%v'  type: %v\n", matches[5], reflect.TypeOf(matches[5]))
 				*/
 
-				linebufferwrite := matches[1] + variable_name + matches[3] + "=" + matches[5] + variable_value
+				linebufferwrite := matches[1] + variableName + matches[3] + "=" + matches[5] + variableValue
 				lines[i] = linebufferwrite
-				variable_changed++
+				variableChanged++
 			}
-			if strings.TrimSpace(matches[2]) == strings.TrimSpace(variable_name) && strings.TrimSpace(matches[6]) == strings.TrimSpace(variable_value) {
-				found_variable_with_same_value = true
+			if strings.TrimSpace(matches[2]) == strings.TrimSpace(variableName) && strings.TrimSpace(matches[6]) == strings.TrimSpace(variableValue) {
+				foundVariableWithSameValue = true
 			}
 		}
 	}
 
-	if variable_changed == 0 && !found_variable_with_same_value {
+	if variableChanged == 0 && !foundVariableWithSameValue {
 		// If no valid configuration line was found, set the separator ' = ' as default.
-		if identified_separator == "" {
-			identified_separator = " = "
+		if identifiedSeparator == "" {
+			identifiedSeparator = " = "
 		}
 
 		// Add a new line to the end of file.
-		lines = append(lines, variable_name+identified_separator+variable_value+"\n")
+		lines = append(lines, variableName+identifiedSeparator+variableValue+"\n")
 	}
 
-	if !found_variable_with_same_value {
+	if !foundVariableWithSameValue {
 		// Change the variable value
 		output := strings.Join(lines, "\n")
 		err = ioutil.WriteFile(filename, []byte(output), 0644)
