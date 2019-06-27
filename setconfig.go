@@ -6,11 +6,11 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
 )
 
 func main() {
-
 	// File name must be specified.
 	if len(os.Args) < 2 {
 		fmt.Println("Missing filename.")
@@ -45,7 +45,8 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	lines := strings.Split(string(input), "\n")
+	lineBreak := getLineBreak(string(input))
+	lines := strings.Split(string(input), lineBreak)
 
 	// Regular expression to find a valid configuration line.
 	var regexstring = "^(\\s*)([a-zA-Z0-9_-]+)(\\s*)(=)(\\s*)(.*)"
@@ -60,8 +61,6 @@ func main() {
 
 	// Loop in array, changing variables as needed.
 	for i, line := range lines {
-		fmt.Println(line)
-
 		regex := regexp.MustCompile(regexstring)
 		matches := regex.FindStringSubmatch(line)
 		// Group 0: full match
@@ -98,20 +97,20 @@ func main() {
 		}
 
 		// Add a new line to the end of file.
-		lines = append(lines, variableName+identifiedSeparator+variableValue+"\n")
+		lines = append(lines, variableName+identifiedSeparator+variableValue+lineBreak)
 	}
 
 	if !foundVariableWithSameValue {
-		// Change the variable value
-		output := strings.Join(lines, "\n")
+		// Change the variable value.
+		output := strings.Join(lines, lineBreak)
 		err = ioutil.WriteFile(filename, []byte(output), 0644)
 		if err != nil {
 			log.Fatalln(err)
 		} else {
-			fmt.Printf("File saved.\n")
+			fmt.Printf("File saved." + lineBreak)
 		}
 	} else {
-		fmt.Printf("No changes were made.\n")
+		fmt.Printf("No changes were made." + lineBreak)
 	}
 
 	os.Exit(0)
@@ -122,5 +121,34 @@ func fileExists(filename string) bool {
 	if os.IsNotExist(err) {
 		return false
 	}
+
 	return !info.IsDir()
+}
+
+func getLineBreak(text string) string {
+	regexLF := regexp.MustCompile("\n")
+	regexCRLF := regexp.MustCompile("\r\n")
+
+	matchesLF := regexLF.FindAllStringIndex(text, -1)
+	matchesCRLF := regexCRLF.FindAllStringIndex(text, -1)
+
+	identifiedLineBreak := ""
+
+	// Compare line breaks to identify the default.
+	if len(matchesLF) <= len(matchesCRLF) {
+		identifiedLineBreak = "\r\n"
+	} else {
+		identifiedLineBreak = "\n"
+	}
+
+	// If the file does not have line breaks, identify by OS.
+	if len(matchesLF) == 0 && len(matchesCRLF) == 0 {
+		if runtime.GOOS == "windows" {
+			identifiedLineBreak = "\r\n"
+		} else {
+			identifiedLineBreak = "\n"
+		}
+	}
+
+	return identifiedLineBreak
 }
